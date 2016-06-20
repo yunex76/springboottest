@@ -21,8 +21,10 @@ public class App implements CommandLineRunner {
 	@Override
 	public void run(String... arg0) throws Exception {
 		
-		String sql = "SELECT 1";
-		SqlParameterSource param = new MapSqlParameterSource();
+		String sql = "SELECT :a + :b";
+		SqlParameterSource param = new MapSqlParameterSource()
+				.addValue("a", 100)
+				.addValue("b", 200);
 		Integer result = jdbcTemplate.queryForObject(sql, param, Integer.class);
 		
 		System.out.println("result = " + result);
