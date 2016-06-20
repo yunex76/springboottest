@@ -30,6 +30,9 @@ public class App implements CommandLineRunner {
 		String sql = "SELECT id, first_name, last_name FROM customers WHERE id = :id";
 		SqlParameterSource param = new MapSqlParameterSource()
 				.addValue("id", 1);
+		
+		/*
+		// 람다식 사용전
 		Customer result = jdbcTemplate.queryForObject(sql, param, new RowMapper<Customer>() {
 
 			@Override
@@ -39,6 +42,14 @@ public class App implements CommandLineRunner {
 			}
 			
 		});
+		*/
+		
+		// java8 람다식 사용
+		Customer result = jdbcTemplate.queryForObject(sql, param,
+				(rs, rowNum) -> new Customer(rs.getInt("id"),
+						rs.getString("first_name"),
+						rs.getString("last_name"))
+		);
 		
 		System.out.println("result = " + result);
 	}
