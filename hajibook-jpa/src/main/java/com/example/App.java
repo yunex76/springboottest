@@ -33,5 +33,8 @@ public class App implements CommandLineRunner {
 		
 		// 데이터 표시
 		customerRepository.findAll().forEach(System.out::println);
+
+		// 데이터 표시
+		customerRepository.findAllOrderByName().forEach(System.out::println);
 	}
 }
