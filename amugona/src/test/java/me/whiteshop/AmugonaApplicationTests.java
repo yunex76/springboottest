@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.CoreMatchers.is;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -58,6 +60,9 @@ public class AmugonaApplicationTests {
 		result.andDo(print());
 		result.andExpect(status().isCreated());
 		
+		// JSON Path
+		result.andExpect(jsonPath("$.username", is("whiteship")));
+		
 		// 중복오류 확인
 		result = mockMvc.perform(post("/accounts")
 			.contentType(MediaType.APPLICATION_JSON)
@@ -65,6 +70,7 @@ public class AmugonaApplicationTests {
 		
 		result.andDo(print());
 		result.andExpect(status().isBadRequest());
+		result.andExpect(jsonPath("$.code", is("duplicated.username.exception")));
 	}
 
 	@Ignore
