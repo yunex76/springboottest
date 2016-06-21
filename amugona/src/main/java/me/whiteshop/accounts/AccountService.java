@@ -19,22 +19,14 @@ public class AccountService {
 
 	public Account createAccount( AccountDto.Create dto ) {
 		
-		/*
-		Account account = new Account();
-		account.setUsername(dto.getUsername());
-		account.setPassword(dto.getPassword());
-		
-		// modelMapper를 이용해서 축약가능
-		*/
-		
-		/*
-		Account account = new Account();
-		BeanUtils.copyProperties(dto, account);
-		
-		// 아래와 동일한 기능
-		*/
-		
 		Account account = modelMapper.map(dto,  Account.class);
+		
+		String username = dto.getUsername();
+		if ( repository.findByUsername(username) != null ) {
+			throw new UserDuplicatedException(username);
+		}
+		
+		// TODO password 해싱
 		
 		Date now = new Date();
 		account.setJoined(now);

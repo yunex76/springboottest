@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import me.whiteshop.accounts.AccountDto;
@@ -34,10 +37,15 @@ public class AmugonaApplicationTests {
 	@Autowired
 	ObjectMapper objectMapper;
 	
+	MockMvc mockMvc;
+	
+	@Before
+	public void setUp() {
+		mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+	}
+	
 	@Test
 	public void createAccount() throws Exception {
-		
-		MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 		
 		AccountDto.Create createDto = new AccountDto.Create();
 		createDto.setUsername("whiteship");
@@ -50,11 +58,29 @@ public class AmugonaApplicationTests {
 		result.andDo(print());
 		result.andExpect(status().isCreated());
 		
-		// Account account = new Account();
-		// account.setUsername("홍길동");
-		// assertNotNull(account);
+		// 중복오류 확인
+		result = mockMvc.perform(post("/accounts")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(createDto)));
 		
-		// assertTrue(true);
+		result.andDo(print());
+		result.andExpect(status().isBadRequest());
+	}
+
+	@Ignore
+	@Test
+	public void createAccount_BadRequest() throws Exception {
+		
+		AccountDto.Create createDto = new AccountDto.Create();
+		createDto.setUsername("  ");
+		createDto.setPassword("1234");
+		
+		ResultActions result = mockMvc.perform(post("/accounts")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(createDto)));
+		
+		result.andDo(print());
+		result.andExpect(status().isBadRequest());
 	}
 
 }

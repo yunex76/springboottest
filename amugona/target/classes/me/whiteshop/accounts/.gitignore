@@ -5,3 +5,4 @@
 /AccountDto.class
 /AccountRepository.class
 /AccountService.class
+/UserDuplicatedException.class
