@@ -1,9 +1,11 @@
 package com.example.api;
 
 import java.net.URI;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +27,24 @@ public class CustomerRestController {
 	@Autowired
 	CustomerService customerService;
 	
+	/*
 	@RequestMapping(method = RequestMethod.GET)
 	List<Customer> getCustomers() {
 		
 		List<Customer> customers = customerService.findAll();
+		return customers;
+	}
+	*/
+
+	/**
+	 * 테스트URL : http://localhost:8080/api/customers?page=0&size=2
+	 * @param pageable
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.GET)
+	Page<Customer> getCustomers(@PageableDefault Pageable pageable) {
+		
+		Page<Customer> customers = customerService.findAll(pageable);
 		return customers;
 	}
 	
