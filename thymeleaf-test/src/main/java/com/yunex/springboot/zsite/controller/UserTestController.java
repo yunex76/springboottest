@@ -1,4 +1,4 @@
-package com.yunex.springboot.controller;
+package com.yunex.springboot.zsite.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
