@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+ 
+    <appender name="Console"
+        class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d{yyyy:MM:dd HH:mm:ss.SSS} %-5level --- [%thread] %logger{35} : %msg %n
+            </Pattern>
+        </layout>
+    </appender>
+      
+    <logger name="jdbc" level="OFF"/>
+	<logger name="org.springframework" level="INFO" />
+	<logger name="jdbc.sqltiming" level="DEBUG"/>
+	<logger name="com.kyoborealco" level="DEBUG"/>
+    
+
+	    <!-- LOG everything at INFO level -->
+	    <root level="INFO">
+	        <appender-ref ref="Console" />
+	    </root>
+	 
+	    <!-- LOG "com.kyoborealco*" at TRACE level -->
+	    <logger name="com.kyoborealco" level="TRACE" additivity="false">
+	        <appender-ref ref="Console" />
+	    </logger>
+
+</configuration>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.thymeleaf.org" lang="ko">
+<head>
+	<title>DataTable 테스트</title>
+	
+	<script
+		src="https://code.jquery.com/jquery-3.5.1.js"
+		integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+		crossorigin="anonymous"></script>
+		
+	<!-- #region datatables files -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.css"/>
+	
+	<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.js"></script>
+	<!-- #endregion -->		
+
+	<!-- 컨텐츠 고유 스크립트 -->
+	<script th:inline="javascript">
+	$(document).ready(function(){
+		console.log('test');
+
+		$('#mainTable').DataTable({
+		    "processing": true,
+		    "serverSide": true,
+		    "pageLength": 10,
+		    "searching": false,
+		    "info" : true,
+		    "ajax": {
+		        "url": "/my/url/list",
+		        "method":"get",
+		        "dataSrc": function (response) {
+
+		            var data = response.data; // your data list
+
+		            var all = [];
+
+		            for (var i = 0; i < data.length; i++) {
+
+
+		                var row = {
+
+		                    rows: response.start + i + 1,
+		                    name: data[i].name, // name ... ,
+		                    position: data[i].position,
+		                    office: data[i].office,
+		                    age: data[i].age,
+		                    startDate: dateString(data[i].startDate),
+		                    salary: numberWithCommas(data[i].salary),
+
+		                };
+		                all.push(row);
+		            }
+		            return all;
+		        }
+
+		    },
+		    "columns": [
+		        { "data": "name"},
+		        { "data": "position"},
+		        { "data": "office"},
+		        { "data": "age"},
+		        { "data": "startDate"},
+		        { "data": "salary"}
+		    ]
+		});		
+		
+	});
+	
+	function numberWithCommas(x) {
+	    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+	}
+	
+	function dateString(str) {
+		return str.substr(0,4)+'-'+str.substr(4,2)+'-'+str.substr(6,2)
+	}
+	</script>
+</head>
+<body>
+	<table id="mainTable" class="dataTable display compact">
+	    <thead>
+	        <tr>
+	            <th>Name</th>
+	            <th>Position</th>                                        
+	            <th>office</th>
+	            <th>age</th>
+	            <th>start date</th>
+	            <th>salary</th>
+	        </tr>
+	    </thead>
+	</table>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.thymeleaf.org" lang="ko">
+<head>
+	<title>DataTable 테스트</title>
+	
+	<script
+		src="https://code.jquery.com/jquery-3.5.1.js"
+		integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+		crossorigin="anonymous"></script>
+		
+	<!-- #region datatables files -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.css"/>
+	
+	<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.js"></script>
+	<!-- #endregion -->		
+
+	<!-- 컨텐츠 고유 스크립트 -->
+	<script th:inline="javascript">
+	$(document).ready(function(){
+		console.log('test');
+		
+		$('#myDataTable').DataTable({
+	         'destroy' : true,
+	         'serverSide' : true,
+	         'sAjaxSource': '/Data/Person',
+	         'sAjaxDataProp': '',
+	         'order': [ [ 0, 'asc' ] ],
+	         'columns':
+	         [
+	            {  'data': 'name',
+	                'render': function(data, type, row, meta){
+	                    if(type === 'display'){ 
+	                        data = '<a href="javascript:openPersonDetail(&apos;'+ row.socialSecurity +'&apos;);">' + data + '</a>' 
+	                    }  
+	                    return data; 
+	                } 
+	            } ,
+	            { 'data': 'socialSecurity'} ,
+	            { 'data': 'birthdate'} ,
+	            { 'data': 'gender'} 
+	         ],
+	         'scrollY' : 300,
+	         'scrollCollapse' : true,
+	         'paging' : true,
+	         'autoWidth' : true,
+	         'ordering' : true,
+	         'searching' : false,
+	         'pageLength' : 20,
+	         'lengthChange' : false,
+	         'pagingType' : 'full_numbers',
+	         'dom' : '<"top"ip>rt<"bottom"fl><"clear">' 
+		});
+	});
+	</script>
+</head>
+<body>
+	<table id="myDataTable" class="dataTable display compact">
+	    <thead>
+	        <tr>
+	            <th>Name</th>
+	            <th>Social Security</th>                                        
+	            <th>Birthdate</th>
+	            <th>Gender</th>
+	        </tr>
+	    </thead>
+	</table>
+</body>
+</html>

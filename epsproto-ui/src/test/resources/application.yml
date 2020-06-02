@@ -1,0 +1,61 @@
+###
+# 교보리얼코 홈페이지 공통모듈 
+#    
+###
+     
+spring:
+  application:
+    name: epsproto-ui
+  jpa:
+    database-platform: org.hibernate.dialect.SQLServer2008Dialect
+    database: SQL_SERVER
+    hibernate:
+      naming.physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl      
+      #naming.implicit-strategy
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        enable_lazy_load_no_trans: true
+  datasource:
+    platform: mssql
+    url: jdbc:sqlserver://152.149.199.204:1433;databaseName=KREPS;
+    username: sa
+    password: realco
+    #url: jdbc:sqlserver://localhost:1433;instance=SQLEXPRESS;databaseName=KYOBOWEB2
+    #username: sa
+    #password: 1234qwer    
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  resources:
+    static-locations: file:///D:/realco-krweb2/assets/krweb-cms
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 10MB
+      location: D:/KRWebFiles/temp
+  # spring boot 기본 메일서버 설정
+  mail:
+    host: smtp.office365.com
+    port: 587
+    username: kyoborealco@kyoborealco.co.kr
+    password: kbrc123!!
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        debug: false
+        transport:
+          protocol: smtp
+  #mvc:
+  #  contentnegotiation:
+  #    favor-parameter: true
+  #    favor-path-extension: true
+  #    media-types:
+  #      xls: application/vnd.ms-excel
+  
+  #application-base.yml 파릴 include
+  profiles:
+    include: base

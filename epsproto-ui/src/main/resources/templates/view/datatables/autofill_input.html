@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko" 
+	xmlns:th="http://www.thymeleaf.org" 
+	xmlns:layout="http://www.thymeleaf.org"
+    layout:decorate="~{layout/default}">
+    <head>
+        <meta charset="utf-8">
+        <title>
+            Autofill input - Datatables - SmartAdmin v4.4.5
+        </title>
+        
+        <script src="/js/vendors.bundle.js"></script>
+
+		<script th:inline="javascript">
+		
+		var boardId = [[${boardId}]];
+		var searchName = /*[[ ${criteria.name} ]]*/;
+		var searchPosition = /*[[ ${criteria.position} ]]*/;
+		var searchStartDateFrom = /*[[ ${criteria.startDateFrom} ]]*/;
+		var searchStartDateTo = /*[[ ${criteria.startDateTo} ]]*/;
+
+		$(document).ready(function(){
+			
+			var url = '/datatables/autofill/get/' + boardId;
+			
+			$.ajax({
+		        type:"get",
+		        url:url,
+		        dataType : "json",
+		        success: function(data){
+		        	
+		        	console.log('data :: id = ' + data.boardId);
+		    
+		        	setData(data);
+		        },
+		        error: function(xhr, status, error) {
+		            alert(error);
+		        }  
+		    });
+			
+			$("#saveButton").on("click", function(e){
+				
+				console.log('★★★★ saveButton click');
+				
+				var form = $("#frm")[0];
+		        var isValid = form.checkValidity();
+		        if (!isValid) {
+		            e.preventDefault();
+		            e.stopPropagation();
+			        form.classList.add('was-validated');
+			        return false;
+		        }
+		        form.classList.add('was-validated');
+
+		        var data = {};
+
+				if ( $('#boardId').val() != null && $('#boardId').val() != undefined && $('#boardId').val().length > 0 ) {
+	        		data['boardId'] = $('#boardId').val();
+				}
+				else {
+					data['boardId'] = 0;
+				}
+	        	data['name'] = $('#name').val();
+	        	data['position'] = $('#position').val();
+	        	data['office'] = $('#office').val();
+	        	data['age'] = $('#age').val();
+	        	
+	        	var startDate = $('#startDate').val();
+	        	data['startDate'] = startDate.replace(/-/g, '');	// ex. 2020-01-31 -> 20200131
+	        	
+	        	data['salary'] = $('#salary').val();
+	        	
+				$.ajax({
+					contentType: 'application/json',
+					dataType: 'json',
+					data: JSON.stringify(data),
+					url: '/datatables/autofill/save',
+					type: 'POST',
+					success: function(response) {
+
+						alert(response.message);
+			        	setData(response.data);
+					},
+					error: function(request, status, error) {
+						alert(response.message);
+					}
+				});
+			});
+			
+			$("#removeButton").on("click", function(){
+				
+				var data = {};
+	        	data['boardId'] = $('#boardId').val();
+				
+	        	if (confirm("삭제하시겠습니까?") == true) {
+	        		
+					$.ajax({
+						contentType: 'application/json',
+						dataType: 'json',
+						data: JSON.stringify(data),
+						url: '/datatables/autofill/remove',
+						type: 'POST',
+						success: function(response) {
+
+							alert(response.message);
+							location.href = "/datatables/autofill?name=" + searchName + "&position=" + searchPosition
+									+ "&startDateFrom=" + searchStartDateFrom + "&startDateTo=" + searchStartDateTo;				
+						},
+						error: function(request, status, error) {
+							alert(response.message);
+						}
+					});
+	        	}
+				
+			});
+
+			$("#listButton").on("click", function(){
+				
+				var data = {};
+				
+				location.href = "/datatables/autofill?name=" + searchName + "&position=" + searchPosition
+						+ "&startDateFrom=" + searchStartDateFrom + "&startDateTo=" + searchStartDateTo;				
+			});
+			
+		});
+
+		function setData(data) {
+			
+        	$('#boardId').val(data.boardId);
+        	$('#name').val(data.name);
+        	$('#position').val(data.position);
+        	$('#office').val(data.office);
+        	$('#age').val(data.age);
+        	$('#startDate').val(dateString(data.startDate));
+        	$('#salary').val(data.salary);
+		}
+
+		</script>
+
+
+    </head>
+    
+    <div layout:fragment="content">
+
+                    <!-- BEGIN Page Content -->
+                    <!-- the #js-page-content id is needed for some plugins to initialize -->
+                    <main id="js-page-content" role="main" class="page-content">
+                        <ol class="breadcrumb page-breadcrumb">
+                            <li class="breadcrumb-item"><a href="javascript:void(0);">SmartAdmin</a></li>
+                            <li class="breadcrumb-item">Datatables</li>
+                            <li class="breadcrumb-item"><a href="/datatables/autofill">Autofill</a></li>
+                            <li class="breadcrumb-item active">input</li>
+                            <li class="position-absolute pos-top pos-right d-none d-sm-block"><span class="js-get-date"></span></li>
+                        </ol>
+                        <div class="subheader">
+                            <h1 class="subheader-title">
+                                <i class='subheader-icon fal fa-edit'></i> Basic Inputs
+                                <small>
+                                    Default input elements for forms
+                                </small>
+                            </h1>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-12">
+                                <div id="panel-1" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2>
+                                            General <span class="fw-300"><i>inputs</i></span>
+                                        </h2>
+                                        <div class="panel-toolbar">
+                                        
+                                        	&nbsp;
+			                                <button type="button" class="btn btn-sm btn-default" id="listButton">
+												<span class="fal fa-list-alt mr-1"></span>
+												목록
+											</button>
+
+                                        	&nbsp;
+			                                <button type="button" class="btn btn-sm btn-default" id="saveButton">
+												<span class="fal fa-save mr-1"></span>
+												저장
+											</button>
+											
+											<th:block th:if="${boardId > 0}">
+												<!-- 상세내용 조회일 경우만 삭제버튼 표시된다. -->
+												&nbsp;
+												<button type="button" class="btn btn-sm btn-default" id="removeButton">
+													<span class="fal fal fa-trash-alt mr-1"></span>
+													삭제
+												</button>
+											</th:block>
+											
+                                            <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                                            <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                                            <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                                        </div>
+                                    </div>
+                                    <div class="panel-container show">
+                                        <div class="panel-content">
+                                            <form name="frm" id="frm" action="#" method="post" class="needs-validation" novalidate>
+                                                <div class="form-group">
+                                                    <label class="form-label" for="simpleinput">id</label>
+                                                    <input type="text" id="boardId" class="form-control" disabled="">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label" for="simpleinput">Name <span class="text-danger">*</span></label>
+                                                    <input type="text" id="name" class="form-control" required>
+													<div class="invalid-feedback">
+                                                    	[Name]을 입력해주세요.
+													</div>
+												</div>
+                                                <div class="form-group">
+                                                    <label class="form-label" for="simpleinput">Position <span class="text-danger">*</span></label>
+                                                    <input type="text" id="position" class="form-control" required>
+													<div class="invalid-feedback">
+                                                    	[Position]을 입력해주세요.
+													</div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label" for="simpleinput">Office</label>
+                                                    <input type="text" id="office" class="form-control">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label" for="example-number">Age <span class="text-danger">*</span></label>
+                                                    <input class="form-control" id="age" type="number" required>
+													<div class="invalid-feedback">
+                                                    	[Age]를 입력해주세요.
+													</div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label" for="example-date">Start Date <span class="text-danger">*</span></label>
+                                                    <input class="form-control" id="startDate" type="date" required>
+													<div class="invalid-feedback">
+                                                    	[Start Date]를 입력해주세요.
+													</div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label" for="example-number">Salary <span class="text-danger">*</span></label>
+                                                    <input class="form-control" id="salary" type="number" required>
+													<div class="invalid-feedback">
+                                                    	[Salary]를 입력해주세요.
+													</div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <!-- this overlay is activated only when mobile menu is triggered -->
+                    <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div>
+					<!-- END Page Content -->
+    
+    </div>
+    
+</html>

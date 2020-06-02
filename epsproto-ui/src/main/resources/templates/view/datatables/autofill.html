@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko" 
+	xmlns:th="http://www.thymeleaf.org" 
+	xmlns:layout="http://www.thymeleaf.org"
+    layout:decorate="~{layout/default}">
+    <head>
+        <meta charset="utf-8">
+        <title>
+            Autofill - Datatables - SmartAdmin v4.4.5
+        </title>
+
+        <script src="/js/vendors.bundle.js"></script>
+        <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+
+		<script th:inline="javascript">
+
+		var searchName = /*[[ ${criteria.name} ]]*/;
+		var searchPosition = /*[[ ${criteria.position} ]]*/;
+		var searchStartDateFrom = /*[[ ${criteria.startDateFrom} ]]*/;
+		var searchStartDateTo = /*[[ ${criteria.startDateTo} ]]*/;
+		
+		var vTable = "";
+
+		$(document).ready(function(){
+			
+			// 검색 조건 추가
+			$('#name').val(searchName);
+			$('#position').val(searchPosition);
+			$('#startDateFrom').val(searchStartDateFrom);
+			$('#startDateTo').val(searchStartDateTo);
+	
+			// 
+			vTable = $('#dt-basic-example').DataTable({
+
+			    "language": {
+			        "emptyTable": "데이터가 없음",
+			        "lengthMenu": "페이지당 _MENU_ 개씩 보기",
+			        "info": "현재 _START_ - _END_ / _TOTAL_건",
+			        "infoEmpty": "데이터 없음",
+			        "infoFiltered": "( _MAX_건의 데이터에서 필터링됨 )",
+			        "zeroRecords": "일치하는 데이터가 없음",
+			        "loadingRecords": "로딩중...",
+			        "processing":     "잠시만 기다려 주세요...",
+			        "paginate": {
+			            "next": "다음",
+			            "previous": "이전"
+			        }
+			    },
+			    
+			    "processing": true,
+			    "serverSide": true,
+			    "pageLength": 10,
+			    "searching": false,
+			    "info" : true,
+		        "select": false,
+			    "ordering" : false,
+			    "stateSave" : true,		// 페이지 위치 저장 (추가한 검색 조건은 반영하지 못함)
+			    
+			    "lengthMenu": [ [5, 10, 25, 50], [5, 10, 25, 50] ],
+			    "ajax": {
+			        "url": "/datatables/autofill/list",
+			        "method":"POST",
+			        
+			        "data": function(data) {
+			            // Read values
+			            var name = $('#name').val();
+			            var position = $('#position').val();
+			            var startDateFrom = $('#startDateFrom').val();
+			            var startDateTo = $('#startDateTo').val();
+
+			            // Append to data
+			            data.name = name;
+			            data.position = position;
+			            data.startDateFrom = startDateFrom;
+			            data.startDateTo = startDateTo;
+			         },
+			      
+//					"data": function(d) {
+//						return $.extend( {}, d, {
+//							"name": $('#name').val(),
+//							"position": $("#position").val(),
+//							"startDateFrom": $("#startDateFrom").val(),
+//							"startDateTo": $("#startDateTo").val(),
+//						} );
+//					},
+					
+			        "dataSrc": function (response) {
+			        	
+			        	console.log('★★★★ ' + JSON.stringify(response));
+	
+			            var data = response.data; // your data list
+	
+			            var all = [];
+	
+			            for (var i = 0; i < data.length; i++) {
+	
+	
+			                var row = {
+	
+			                    rows: response.start + i + 1,
+			                    boardId: data[i].boardId,
+			                    name: data[i].name,
+			                    position: data[i].position,
+			                    office: data[i].office,
+			                    age: data[i].age,
+			                    startDate: dateString(data[i].startDate),
+			                    salary: numberWithCommas(data[i].salary),
+	
+			                };
+			                all.push(row);
+			            }
+			            return all;
+			        }
+	
+			    },
+			    "columns": [
+			        { "data": "boardId"},
+			        { "data": "name"},
+			        { "data": "position"},
+			        { "data": "office"},
+			        { "data": "age"},
+			        { "data": "startDate"},
+			        { "data": "salary"}
+			    ]
+			});		
+			
+			$(vTable.table().container()).on('dblclick', 'tbody tr', function () {
+				
+			    var row = vTable.row(this);
+			    // console.log('dblclick :: Row Index = ' + row.index() + ' / data = ' + row.data() + ' / boardId = ' + row.data().boardId);
+			    
+			    location.href = "/datatables/autofill/input?id=" + row.data().boardId + "&name=" + $('#name').val()
+			    				+ "&position=" + $('#position').val()
+			    				+ "&startDateFrom=" + stringDate($('#startDateFrom').val())
+			    				+ "&startDateTo=" + stringDate($('#startDateTo').val());
+			});
+			 
+			$("#addButton").on("click", function(){
+				
+			    location.href = "/datatables/autofill/input?name=" + $('#name').val()
+								+ "&position=" + $('#position').val()
+								+ "&startDateFrom=" + stringDate($('#startDateFrom').val())
+								+ "&startDateTo=" + stringDate($('#startDateTo').val());
+			});
+
+			$("#searchButton").on("click", function(){
+				vTable.ajax.reload();
+			});
+			
+		});
+		
+		</script>
+
+    </head>
+    
+	<div layout:fragment="content">
+	
+                    <!-- BEGIN Page Content -->
+                    <!-- the #js-page-content id is needed for some plugins to initialize -->
+                    <main id="js-page-content" role="main" class="page-content">
+                        <ol class="breadcrumb page-breadcrumb">
+                            <li class="breadcrumb-item"><a href="javascript:void(0);">SmartAdmin</a></li>
+                            <li class="breadcrumb-item">Datatables</li>
+                            <li class="breadcrumb-item active">Autofill</li>
+                            <li class="position-absolute pos-top pos-right d-none d-sm-block"><span class="js-get-date"></span></li>
+                        </ol>
+                        <div class="subheader">
+                            <h1 class="subheader-title">
+                                <i class='subheader-icon fal fa-table'></i> DataTables: <span class='fw-300'>Autofill</span> <sup class='badge badge-primary fw-500'>ADDON</sup>
+                                <small>
+                                    Create headache free searching, sorting and pagination tables without any complex configuration
+                                </small>
+                            </h1>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-12">
+                                <div id="panel-1" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2>
+                                            Example <span class="fw-300"><i>Table</i></span>
+                                        </h2>
+                                        <div class="panel-toolbar">
+			                                <button type="button" class="btn btn-sm btn-default" id="addButton">
+												<span class="fal fal fa-plus-square mr-1"></span>
+												추가
+											</button>
+                                            <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                                            <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                                            <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                                        </div>
+                                    </div>
+                                    <div class="panel-container show">
+                                        <div class="panel-content">
+
+                                            <div class="panel-tag">
+	                                            <form name="frmSearch" id="frmSearch" action="/datatables/autofill/list">
+		                                            <div class="row">
+		                                                <div class="form-group col-lg-6">
+		                                                    <label class="form-label" for="simpleinput">Name</label>
+		                                                    <input type="text" id="name" class="form-control">
+		                                                </div>
+		                                                <div class="form-group col-lg-6">
+		                                                    <label class="form-label" for="simpleinput">Position</label>
+		                                                    <input type="text" id="position" class="form-control">
+		                                                </div>
+		                                            </div>
+		                                            <div class="row">
+		                                                <div class="form-group col-lg-6">
+		                                                    <label class="form-label" for="simpleinput">Start Date (From)</label>
+		                                                    <input type="date" id="startDateFrom" class="form-control">
+		                                                </div>
+		                                                <div class="form-group col-lg-6">
+		                                                    <label class="form-label" for="simpleinput">Start Date (To)</label>
+		                                                    <input type="date" id="startDateTo" class="form-control">
+		                                                </div>
+		                                            </div>
+		                                            <div class="row">
+		                                                <div class="form-group col-lg-12">
+							                                <button type="button" class="btn btn-sm btn-default" id="searchButton">
+																<span class="fal fa-search mr-1"></span>
+																조회
+															</button>
+														</div>
+		                                            </div>
+												</form>
+                                            </div>
+                                        
+                                            <!-- datatable start -->
+                                            <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                                                <thead>
+                                                    <tr>
+                                                        <th>id</th>
+                                                        <th>Name</th>
+                                                        <th>Position</th>
+                                                        <th>Office</th>
+                                                        <th>Age</th>
+                                                        <th>Start date</th>
+                                                        <th>Salary</th>
+                                                    </tr>
+                                                </thead>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th>id</th>
+                                                        <th>Name</th>
+                                                        <th>Position</th>
+                                                        <th>Office</th>
+                                                        <th>Age</th>
+                                                        <th>Start date</th>
+                                                        <th>Salary</th>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                            <!-- datatable end -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    
+                    <!-- this overlay is activated only when mobile menu is triggered -->
+                    <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div>
+					<!-- END Page Content -->
+	</div>
+
+</html>
